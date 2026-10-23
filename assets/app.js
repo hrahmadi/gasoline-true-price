@@ -2,34 +2,25 @@
   const D = window.DATA, C = window.Charts, fa = C.faNum, v = C.css;
   const yr = (y) => fa(y).replace(/٬/g, "");
 
-  /* 1. pump price / consumption toggle */
-  const c1 = document.getElementById("c1");
+  /* 1. pump price and consumption, two separate charts */
   const hikes = [
-    { x: 1389, label: "هدفمندی" }, { x: 1394, label: "۱۳۹۴", dy: 14 }, { x: 1398, label: "آبان ۹۸" }, { x: 1404, label: "نرخ سوم", dy: 14 },
+    { x: 1389, label: "هدفمندی" }, { x: 1394, label: "۱۳۹۴", dy: 14 }, { x: 1398, label: "آبان ۹۸" }, { x: 1404, label: "نرخ سوم", dy: 30 },
   ];
   const notes = Object.fromEntries([[1386, "سهمیه‌بندی از تیر ۱۳۸۶"], [1389, "هدفمندی یارانه‌ها، آذر ۱۳۸۹"], [1393, "افزایش اردیبهشت ۱۳۹۳"],
-    [1394, "تک‌نرخی شدن، خرداد ۱۳۹۴"], [1398, "افزایش آبان ۱۳۹۸"], [1404, "نرخ سوم ۵ هزار تومانی، آذر ۱۴۰۴"], [1405, "سهمیهٔ نرخ دوم: ۵۰ لیتر"]]);
-  function drawPrice() {
-    document.getElementById("c1-sub").textContent = "قیمت بنزین معمولی سهمیه‌ای، تومان در هر لیتر. خط‌چین‌ها: سال‌های افزایش قیمت.";
-    C.line(c1, {
-      data: D.pumpPrice, label: "قیمت بنزین",
-      series: [{ key: "quota", name: "سهمیه‌ای", color: v("--gas"), step: true, width: 3 }],
-      annotations: hikes, yFmt: (x) => fa(x),
-      tipFmt: (d) => `<b>${yr(d.y)}</b><div>سهمیه‌ای: ${fa(d.quota)} تومان</div>` + (d.free ? `<div>آزاد: ${fa(d.free)} تومان</div>` : "") +
-        (d.y >= 1404 ? `<div>نرخ سوم: ۵٬۰۰۰ تومان</div>` : "") + (notes[d.y] ? `<div style="opacity:.8">${notes[d.y]}</div>` : ""),
-    });
-  }
-  function drawCons() {
-    document.getElementById("c1-sub").textContent = "میانگین مصرف روزانهٔ بنزین، میلیون لیتر. افت ۱۳۹۹: محدودیت‌های کرونا.";
-    C.line(c1, {
-      data: D.consumption, label: "مصرف بنزین",
-      series: [{ key: "c", name: "مصرف", color: v("--ink"), width: 2.5 }],
-      annotations: hikes.filter((h) => h.x <= 1402), yFmt: (x) => fa(x),
-      tipFmt: (d) => `<b>${yr(d.y)}</b><div>${fa(d.c, 1)} میلیون لیتر در روز</div>` + (d.y === 1402 ? `<div style="opacity:.8">برآورد بر پایهٔ آمار رسانه‌ای</div>` : ""),
-    });
-  }
-  segmented(c1.closest("figure").querySelector(".seg"), (b) => (b.dataset.v === "price" ? drawPrice() : drawCons()));
-  drawPrice();
+    [1394, "تک‌نرخی شدن، خرداد ۱۳۹۴"], [1398, "افزایش آبان ۱۳۹۸"], [1404, "نرخ سوم ۵ هزار تومانی، آذر ۱۴۰۴"], [1405, "سهمیه‌ی نرخ دوم: ۵۰ لیتر"]]);
+  C.line(document.getElementById("c1a"), {
+    data: D.pumpPrice, label: "قیمت بنزین", endLabels: false,
+    series: [{ key: "quota", name: "سهمیه‌ای", color: v("--gas"), step: true, width: 3 }],
+    annotations: hikes, yFmt: (x) => fa(x),
+    tipFmt: (d) => `<b>${yr(d.y)}</b><div>سهمیه‌ای: ${fa(d.quota)} تومان</div>` + (d.free ? `<div>آزاد: ${fa(d.free)} تومان</div>` : "") +
+      (d.y >= 1404 ? `<div>نرخ سوم: ۵٬۰۰۰ تومان</div>` : "") + (notes[d.y] ? `<div style="opacity:.8">${notes[d.y]}</div>` : ""),
+  });
+  C.line(document.getElementById("c1b"), {
+    data: D.consumption, label: "مصرف بنزین", endLabels: false,
+    series: [{ key: "c", name: "مصرف", color: v("--ink"), width: 2.5 }],
+    yFmt: (x) => fa(x),
+    tipFmt: (d) => `<b>${yr(d.y)}</b><div>${fa(d.c, 1)} میلیون لیتر در روز</div>` + (d.y === 1402 ? `<div style="opacity:.8">برآورد بر پایه‌ی آمار رسانه‌ای</div>` : ""),
+  });
 
   /* 2. cents */
   C.line(document.getElementById("c2"), {
@@ -56,13 +47,13 @@
   C.line(document.getElementById("c4"), {
     data: D.index, label: "شاخص مسکن، دلار و تورم",
     series: [
-      { key: "house", name: "مسکن", color: v("--house"), width: 3 },
-      { key: "usd", name: "دلار", color: v("--usd"), width: 3 },
+      { key: "house", name: "خرید مسکن", color: v("--house"), width: 3, labelDy: -6 },
+      { key: "usd", name: "دلار", color: v("--usd"), width: 3, labelDy: 8 },
+      { key: "rent", name: "اجاره", color: v("--rent"), width: 2.5 },
       { key: "cpi", name: "تورم", color: v("--cpi"), width: 2.5 },
-      { key: "rent", name: "اجاره", color: v("--rent"), width: 2, dash: "5 4", labelDy: 6 },
     ],
-    xTicks: [1396, 1397, 1398, 1399, 1400, 1401, 1402],
-    tipFmt: (d) => `<b>${yr(d.y)}</b><div><i style="background:${v("--house")}"></i>مسکن: ${fa(d.house)}</div><div><i style="background:${v("--usd")}"></i>دلار: ${fa(d.usd)}</div><div><i style="background:${v("--cpi")}"></i>تورم: ${fa(d.cpi)}</div><div><i style="background:${v("--rent")}"></i>اجاره: ${fa(d.rent)}</div>`,
+    xTicks: [1396, 1397, 1398, 1399, 1400, 1401, 1402, 1403],
+    tipFmt: (d) => `<b>${yr(d.y)}</b><div><i style="background:${v("--house")}"></i>خرید مسکن: ${fa(d.house)}</div><div><i style="background:${v("--usd")}"></i>دلار: ${fa(d.usd)}</div><div><i style="background:${v("--cpi")}"></i>تورم: ${fa(d.cpi)}</div><div><i style="background:${v("--rent")}"></i>اجاره: ${fa(d.rent)}</div>`,
   });
 
   /* 5. ring towns growth */
@@ -124,19 +115,46 @@
   }));
   calc();
 
+
+  /* comparison cards: base year vs selected year */
+  const byY = Object.fromEntries(D.cards.map((r) => [r.y, r]));
+  let base = 1390;
+  function prideYear(y) { return byY[y].pride != null ? y : (y === 1390 ? 1391 : null); }
+  function drawCards() {
+    const y = +$("cmp-year").value;
+    $("cmp-year-o").textContent = yr(y);
+    const A = byY[base], B = byY[y], pa = prideYear(base);
+    const card = (from, to, unit, text, note) =>
+      `<div class="card"><span class="from">${from} ←</span><b>${to}</b><span>${text}</span><small>${note}</small></div>`;
+    $("cmp-cards").innerHTML =
+      card(fa(A.wageUsd) + " دلار", fa(B.wageUsd) + " دلار", "", `حداقل دستمزد ماهانه به دلار، ${yr(base)} در برابر ${yr(y)}`,
+        "به نرخ میانگین سالانه‌ی دلار آزاد" + (y === 1405 ? "، ۱۴۰۵ تا پایان شهریور" : "")) +
+      card(fa(byY[pa].pride) + " ماه", fa(B.pride) + " ماه", "", `حداقل دستمزد لازم برای خرید ارزان‌ترین خودروی ایران (پراید)، ${yr(pa)} در برابر ${yr(y)}`,
+        "قیمت پراید: گزارش‌های رسانه‌ای، میانگین سالانه" + (pa !== base ? `. برای ${yr(base)} داده نیست و ${yr(pa)} آمده است` : "")) +
+      card(fa(A.sqm, 1) + " ماه", fa(B.sqm, 1) + " ماه", "", `حداقل دستمزد لازم برای خرید یک متر مربع خانه در تهران، ${yr(base)} در برابر ${yr(y)}`,
+        B.sqmEst ? "۱۴۰۴ و ۱۴۰۵ برآورد است: روند قیمت‌های آگهی‌شده در کیلید، هم‌تراز با آخرین داده‌ی رسمی ۱۴۰۳" : "بانک مرکزی و مرکز آمار، محاسبه‌ی نگارنده");
+  }
+  document.querySelectorAll("#cmp-base button").forEach((b) => b.addEventListener("click", () => {
+    base = +b.dataset.y;
+    document.querySelectorAll("#cmp-base button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    drawCards();
+  }));
+  $("cmp-year").addEventListener("input", drawCards);
+  drawCards();
+
   /* loop diagram */
   const svg = $("loop"), NS = "http://www.w3.org/2000/svg";
   const mk = (tag, a, p) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); (p || svg).appendChild(n); return n; };
   const nodes = [
-    { x: 555, y: 80, t: "ریال ارزش خود را از دست می‌دهد", s: "دلار هر سال گران‌تر" },
-    { x: 555, y: 260, t: "مسکن و خودرو با دلار بالا می‌روند", s: "دستمزد عقب می‌ماند" },
-    { x: 165, y: 260, t: "دورتر زندگی کن، بیشتر بران", s: "حاشیه‌نشینی و شغل دوم با خودرو" },
-    { x: 165, y: 80, t: "بنزین ارزان، ضربه‌گیر", s: "تنها قیمتی که یخ زده" },
-    { x: 360, y: 405, t: "افزایش قیمت بنزین", s: "ضربه‌گیر برداشته می‌شود ← اعتراض", hot: true },
+    { x: 630, y: 70, t: "ریال ارزش خود را از دست می‌دهد", s: "دلار هر سال گران‌تر" },
+    { x: 630, y: 250, t: "مسکن و خودرو با دلار بالا می‌روند", s: "دستمزد عقب می‌ماند" },
+    { x: 371, y: 250, t: "دورتر زندگی کن، بیشتر بران", s: "حاشیه‌نشینی و شغل دوم با خودرو" },
+    { x: 371, y: 70, t: "بنزین ارزان، ضربه‌گیر", s: "تنها قیمتی که یخ زده" },
+    { x: 112, y: 70, t: "افزایش قیمت بنزین", s: "ضربه‌گیر برداشته می‌شود ← اعتراض", hot: true },
   ];
   const links = [
     { a: 0, b: 1 }, { a: 1, b: 2 }, { a: 2, b: 3 },
-    { a: 3, b: 0, dash: true, label: "هزینهٔ یارانه و واردات؟", label2: "(پرسش باز)" },
+    { a: 3, b: 0, dash: true, label: "هزینه‌ی یارانه و واردات؟", label2: "(پرسش باز)" },
     { a: 3, b: 4, hot: true },
   ];
   const defs = mk("defs", {});
@@ -144,7 +162,7 @@
     const m = mk("marker", { id, viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
     mk("path", { d: "M0,0L10,5L0,10z", fill: col }, m);
   });
-  const W = 250, H = 72;
+  const W = 210, H = 74;
   const edge = (n, ux, uy) => { // point on box border in direction (ux,uy)
     const tx = ux ? (W / 2 + 6) / Math.abs(ux) : Infinity, ty = uy ? (H / 2 + 6) / Math.abs(uy) : Infinity, t = Math.min(tx, ty);
     return [n.x + ux * t, n.y + uy * t];
@@ -155,7 +173,7 @@
     const [sx, sy] = edge(A, dx, dy), [ex, ey] = edge(B, -dx, -dy);
     const p = mk("path", { d: `M${sx},${sy} L${ex},${ey}`, class: "arrow" + (l.hot ? " hot" : ""), "stroke-dasharray": l.dash ? "5 5" : "",
       "marker-end": l.hot ? "url(#ahh)" : "url(#ah)" });
-    if (l.label) { const t = mk("text", { x: (sx + ex) / 2, y: (sy + ey) / 2 - 10, "text-anchor": "middle", class: "ax", style: "font-size:13px;fill:var(--ink-3)" }); t.textContent = l.label; t.setAttribute("y", 24); const t2 = mk("text", { x: (sx + ex) / 2, y: 138, "text-anchor": "middle", class: "ax", style: "font-size:12px;fill:var(--ink-3)" }); t2.textContent = l.label2 || ""; }
+    if (l.label) { const t = mk("text", { x: (sx + ex) / 2, y: (sy + ey) / 2 - 10, "text-anchor": "middle", class: "ax", style: "font-size:13px;fill:var(--ink-3)" }); t.textContent = l.label; t.setAttribute("y", 18); const t2 = mk("text", { x: (sx + ex) / 2, y: 128, "text-anchor": "middle", class: "ax", style: "font-size:12px;fill:var(--ink-3)" }); t2.textContent = l.label2 || ""; }
     return p;
   });
   nodes.forEach((n, i) => {

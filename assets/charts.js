@@ -74,7 +74,8 @@
       (opts.annotations || []).forEach((a) => {
         el("line", { x1: X(a.x), x2: X(a.x), y1: m.t, y2: H - m.b, stroke: css("--accent"), "stroke-width": 1, "stroke-dasharray": "3 3", opacity: 0.55 }, svg);
         if (a.label) {
-          const t = el("text", { x: X(a.x) + 4, y: m.t + 10 + (a.dy || 0), class: "ann" }, svg);
+          const nearEnd = X(a.x) > W - m.r - 60;
+          const t = el("text", { x: X(a.x) + (nearEnd ? -4 : 4), y: m.t + 10 + (a.dy || 0), class: "ann", "text-anchor": nearEnd ? "end" : "start" }, svg);
           t.textContent = a.label;
         }
       });
