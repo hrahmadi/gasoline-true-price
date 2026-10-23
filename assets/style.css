@@ -35,6 +35,7 @@ a{color:var(--accent)}
 header.hero{padding:72px 0 40px;border-bottom:1px solid var(--rule)}
 .kicker{color:var(--accent);font-weight:700;font-size:15px;letter-spacing:0}
 h1{font-size:clamp(34px,6vw,54px);line-height:1.35;margin:10px 0 18px;font-weight:900}
+.subtitle{font-size:clamp(20px,3vw,27px);font-weight:800;color:var(--accent);line-height:1.6;margin:-8px 0 16px}
 .dek{font-size:21px;color:var(--ink-2);line-height:1.9;margin:0}
 .byline{margin-top:22px;font-size:14px;color:var(--ink-3)}
 
@@ -156,3 +157,45 @@ footer.sources li{margin-bottom:4px}
 /* comparison control */
 .compare{margin:30px 0}
 .compare .cards{margin-top:14px}
+
+/* pull quote boxed beside the text */
+blockquote.pull{float:left;width:min(40%,300px);margin:6px 30px 16px 0;padding:18px 20px;border:0;border-top:4px solid var(--accent);background:var(--surface);border-radius:14px;box-shadow:var(--shadow);font-size:19px;line-height:1.8}
+figure,details.side,.cards,.compare,h3,.wide{clear:both}
+@media (max-width:700px){blockquote.pull{float:none;width:auto;margin:24px 0}}
+.calc-ctl{display:flex;flex-wrap:wrap;gap:6px 28px;margin-top:6px}
+.ctl-lab{display:block;font-size:13.5px;color:var(--ink-2);margin-bottom:2px}
+.calc-assume{font-size:13.5px;color:var(--ink-3);margin:4px 0 14px}
+.calc-given{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.calc-given div{border-top:3px solid var(--ink);padding-top:8px}
+.calc-given b{display:block;font-size:24px;font-weight:900;line-height:1.4}
+.calc-given span{font-size:13px;color:var(--ink-2);line-height:1.6;display:block}
+.calc-ctl{align-items:center;gap:4px 14px;margin:2px 0 8px}
+.calc-ctl .ctl-lab{display:inline;font-size:15px;font-weight:700;color:var(--ink)}
+.calc-given b{white-space:nowrap;font-size:clamp(19px,5vw,24px)}
+.calc-given{margin:22px 0 26px;gap:20px}
+.calc-ctl{display:block;margin:0 0 26px}
+.calc-ctl .ctl-lab{display:block;margin-bottom:10px}
+.calc-ctl .seg{margin:0}
+figure:has(#i-price) .calc-out{margin:0 0 14px}
+figure:has(#i-price) .meter{margin-bottom:18px}
+
+/* coin diagram */
+.coin{--ln:var(--ink-3)}
+.coin .cn{background:var(--bg);border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px;text-align:center;font-weight:700;font-size:15px;line-height:1.6}
+.coin .cn small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-2)}
+.coin .cn.root{max-width:340px;margin:8px auto 0}
+.coin .cn.key{max-width:340px;margin:0 auto;border-color:var(--ink);border-width:2px}
+.coin .cn.hot{border-color:var(--accent);color:var(--accent)}
+.coin > .cn.hot{max-width:220px;margin:0 auto}
+.coin .sides{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.coin .side-lab{margin:0 0 6px;text-align:center;font-size:12.5px;font-weight:800;color:var(--accent)}
+.coin .dn{display:block;width:2px;height:22px;margin:0 auto;background:var(--ln);position:relative}
+.coin .dn::after{content:"";position:absolute;bottom:-1px;left:-4px;border:5px solid transparent;border-top:6px solid var(--ln);border-bottom:0}
+.coin .split,.coin .merge{height:20px;margin:0 25%;border:2px solid var(--ln);position:relative}
+.coin .split{border-bottom:0;border-radius:10px 10px 0 0;margin-top:16px}
+.coin .merge{border-top:0;border-radius:0 0 10px 10px;margin-bottom:16px}
+.coin .split::before,.coin .merge::after{content:"";position:absolute;left:50%;width:2px;height:16px;background:var(--ln);margin-left:-1px}
+.coin .split::before{top:-18px}
+.coin .merge::after{bottom:-18px}
+@media (max-width:560px){.coin .cn{font-size:13.5px;padding:8px}.coin .sides{gap:10px}}
+blockquote.final p{margin:0 0 .6em}blockquote.final p:last-child{margin:0}
