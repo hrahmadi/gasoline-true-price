@@ -90,6 +90,20 @@
   segmented(c7.closest("figure").querySelector(".seg"), (b) => drawDec(b.dataset.y));
   drawDec("1400");
 
+  /* 8. trip purpose */
+  const c8 = document.getElementById("c8");
+  const purp = { work: "کار", edu: "تحصیل", leis: "تفریح و دیدار", shop: "خرید", nhb: "سایر" };
+  function drawPurpose(key) {
+    C.bars(c8, {
+      label: "هدف سفرهای روزانه در تهران",
+      bars: D.tripPurpose.map((r) => ({ label: purp[r.k], value: r[key], strong: r.k === "work" || r.k === "edu",
+        color: r.k === "work" || r.k === "edu" ? v("--gas") : v("--muted-bar") })),
+      fmt: (x) => fa(x, 0) + "٪", max: 55,
+    });
+  }
+  segmented(c8.closest("figure").querySelector(".seg"), (b) => drawPurpose(b.dataset.k));
+  drawPurpose("trips");
+
   /* calculator */
   const $ = (id) => document.getElementById(id);
   const toman = (x) => (x >= 1e6 ? fa(x / 1e6, 1) + " میلیون تومان" : fa(Math.round(x / 1000) * 1000) + " تومان");
