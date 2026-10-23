@@ -7,13 +7,13 @@
     { x: 1389, label: "هدفمندی" }, { x: 1394, label: "۱۳۹۴", dy: 14 }, { x: 1398, label: "آبان ۹۸" }, { x: 1404, label: "نرخ سوم", dy: 30 },
   ];
   const notes = Object.fromEntries([[1386, "سهمیه‌بندی از تیر ۱۳۸۶"], [1389, "هدفمندی یارانه‌ها، آذر ۱۳۸۹"], [1393, "افزایش اردیبهشت ۱۳۹۳"],
-    [1394, "تک‌نرخی شدن، خرداد ۱۳۹۴"], [1398, "افزایش آبان ۱۳۹۸"], [1404, "نرخ سوم ۵ هزار تومانی، آذر ۱۴۰۴"], [1405, "سهمیه‌ی نرخ دوم: ۵۰ لیتر"]]);
+    [1394, "تک‌نرخی شدن، خرداد ۱۳۹۴"], [1398, "افزایش آبان ۱۳۹۸"], [1404, "نرخ سوم ۵ هزار تومانی، آذر ۱۴۰۴"], [1405, "سهمیه‌ی نرخ دوم ۵۰ لیتر، نرخ سوم ۱۰ هزار تومان از شهریور"]]);
   C.line(document.getElementById("c1a"), {
     data: D.pumpPrice, label: "قیمت بنزین", endLabels: false,
     series: [{ key: "quota", name: "سهمیه‌ای", color: v("--gas"), step: true, width: 3 }],
     annotations: hikes, yFmt: (x) => fa(x),
     tipFmt: (d) => `<b>${yr(d.y)}</b><div>سهمیه‌ای: ${fa(d.quota)} تومان</div>` + (d.free ? `<div>آزاد: ${fa(d.free)} تومان</div>` : "") +
-      (d.y >= 1404 ? `<div>نرخ سوم: ۵٬۰۰۰ تومان</div>` : "") + (notes[d.y] ? `<div style="opacity:.8">${notes[d.y]}</div>` : ""),
+      (d.y === 1404 ? `<div>نرخ سوم: ۵٬۰۰۰ تومان</div>` : d.y >= 1405 ? `<div>نرخ سوم: ۱۰٬۰۰۰ تومان</div>` : "") + (notes[d.y] ? `<div style="opacity:.8">${notes[d.y]}</div>` : ""),
   });
   C.line(document.getElementById("c1b"), {
     data: D.consumption, label: "مصرف بنزین", endLabels: false,
@@ -96,7 +96,7 @@
   let priceMode = "ir";
   function cost(liters) {
     if (priceMode === "tr") return liters * 1.23 * D.fx1405;
-    const tiers = [[60, 1500], [50, 3000], [Infinity, 5000]];
+    const tiers = [[60, 1500], [50, 3000], [Infinity, 10000]];
     let left = liters, c = 0;
     for (const [q, p] of tiers) { const u = Math.min(left, q); c += u * p; left -= u; if (left <= 0) break; }
     return c;
