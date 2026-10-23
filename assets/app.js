@@ -36,7 +36,7 @@
     "Pakistan": "پاکستان", "Afghanistan": "افغانستان", "Turkey": "ترکیه", "Armenia": "ارمنستان", "World average": "میانگین جهان" };
   C.bars(document.getElementById("c3"), {
     label: "قیمت بنزین در منطقه",
-    bars: D.regional.slice().sort((a, b) => a.p - b.p).map((r) => ({
+    bars: D.regional.filter((r) => ["Iran", "United Arab Emirates", "Pakistan", "Turkey", "World average"].includes(r.c)).sort((a, b) => a.p - b.p).map((r) => ({
       label: names[r.c] || r.c, value: r.p, strong: r.c === "Iran" || r.c === "World average",
       color: r.c === "Iran" ? v("--gas") : r.c === "World average" ? v("--ink-2") : v("--muted-bar"),
     })),
@@ -93,53 +93,57 @@
   /* calculator */
   const $ = (id) => document.getElementById(id);
   const toman = (x) => (x >= 1e6 ? fa(x / 1e6, 1) + " میلیون تومان" : fa(Math.round(x / 1000) * 1000) + " تومان");
-  function cost(liters, mul) {
+  let priceMode = "ir";
+  function cost(liters) {
+    if (priceMode === "tr") return liters * 1.23 * D.fx1405;
     const tiers = [[60, 1500], [50, 3000], [Infinity, 5000]];
     let left = liters, c = 0;
-    for (const [q, p] of tiers) { const u = Math.min(left, q); c += u * p * mul; left -= u; if (left <= 0) break; }
+    for (const [q, p] of tiers) { const u = Math.min(left, q); c += u * p; left -= u; if (left <= 0) break; }
     return c;
   }
   function calc() {
-    const km = +$("i-km").value, days = +$("i-days").value, eff = +$("i-eff").value, inc = +$("i-inc").value * 1e6, mul = +$("i-mul").value;
+    const km = +$("i-km").value, days = +$("i-days").value, eff = +$("i-eff").value, inc = +$("i-inc").value * 1e6;
     $("o-km").textContent = fa(km); $("o-days").textContent = fa(days); $("o-inc").textContent = fa(+$("i-inc").value, 1) + " میلیون تومان";
-    const L = (km * days * eff) / 100, c = cost(L, mul), p = (100 * c) / inc;
+    const L = (km * days * eff) / 100, c = cost(L), p = (100 * c) / inc;
     $("r-l").textContent = fa(Math.round(L));
     $("r-c").textContent = toman(c);
     $("r-p").textContent = fa(p, 1) + "٪";
     $("m-1").style.width = Math.min(100, p) + "%";
     document.querySelectorAll("#presets button").forEach((b) => b.setAttribute("aria-pressed", +b.dataset.km === km));
   }
-  ["i-km", "i-days", "i-eff", "i-inc", "i-mul"].forEach((id) => $(id).addEventListener("input", calc));
+  ["i-km", "i-days", "i-eff", "i-inc"].forEach((id) => $(id).addEventListener("input", calc));
   document.querySelectorAll("#presets button").forEach((b) => b.addEventListener("click", () => {
     $("i-km").value = b.dataset.km; $("i-days").value = b.dataset.km === "160" ? 26 : 22; calc();
+  }));
+  document.querySelectorAll("#i-price button").forEach((b) => b.addEventListener("click", () => {
+    priceMode = b.dataset.p;
+    document.querySelectorAll("#i-price button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    calc();
   }));
   calc();
 
 
-  /* comparison cards: base year vs selected year */
+  /* comparison cards: 1390 vs selected year */
   const byY = Object.fromEntries(D.cards.map((r) => [r.y, r]));
-  let base = 1390;
-  function prideYear(y) { return byY[y].pride != null ? y : (y === 1390 ? 1391 : null); }
+  const base = 1390, ARW = '<svg class="arw" viewBox="0 0 64 16" aria-hidden="true"><path d="M62 8H4M10 2L3 8l7 6"/></svg>';
+  let endY = 1405;
   function drawCards() {
-    const y = +$("cmp-year").value;
-    $("cmp-year-o").textContent = yr(y);
-    const A = byY[base], B = byY[y], pa = prideYear(base);
-    const card = (from, to, unit, text, note) =>
-      `<div class="card"><span class="from">${from} ←</span><b>${to}</b><span>${text}</span><small>${note}</small></div>`;
+    $("cmp-year-o").textContent = yr(endY);
+    $("cmp-prev").disabled = endY <= 1391; $("cmp-next").disabled = endY >= 1405;
+    const A = byY[base], B = byY[endY], pa = A.pride != null ? base : 1391;
+    const card = (t, from, to, d) =>
+      `<div class="card"><p class="ct">${t}</p><div class="nums"><span class="from">${from}</span>${ARW}<b>${to}</b></div><span>${d}</span></div>`;
     $("cmp-cards").innerHTML =
-      card(fa(A.wageUsd) + " دلار", fa(B.wageUsd) + " دلار", "", `حداقل دستمزد ماهانه به دلار، ${yr(base)} در برابر ${yr(y)}`,
-        "به نرخ میانگین سالانه‌ی دلار آزاد" + (y === 1405 ? "، ۱۴۰۵ تا پایان شهریور" : "")) +
-      card(fa(byY[pa].pride) + " ماه", fa(B.pride) + " ماه", "", `حداقل دستمزد لازم برای خرید ارزان‌ترین خودروی ایران (پراید)، ${yr(pa)} در برابر ${yr(y)}`,
-        "قیمت پراید: گزارش‌های رسانه‌ای، میانگین سالانه" + (pa !== base ? `. برای ${yr(base)} داده نیست و ${yr(pa)} آمده است` : "")) +
-      card(fa(A.sqm, 1) + " ماه", fa(B.sqm, 1) + " ماه", "", `حداقل دستمزد لازم برای خرید یک متر مربع خانه در تهران، ${yr(base)} در برابر ${yr(y)}`,
-        B.sqmEst ? "۱۴۰۴ و ۱۴۰۵ برآورد است: روند قیمت‌های آگهی‌شده در کیلید، هم‌تراز با آخرین داده‌ی رسمی ۱۴۰۳" : "بانک مرکزی و مرکز آمار، محاسبه‌ی نگارنده");
+      card("دستمزد به دلار", fa(A.wageUsd), fa(B.wageUsd), "حداقل دستمزد ماهانه، دلار") +
+      card("پراید", fa(byY[pa].pride), fa(B.pride), "ماه حداقل دستمزد برای ارزان‌ترین خودرو") +
+      card("مسکن تهران", fa(A.sqm, 1), fa(B.sqm, 1), "ماه حداقل دستمزد برای یک متر مربع");
+    const notes = ["دستمزد به نرخ میانگین سالانه‌ی دلار آزاد" + (endY === 1405 ? "، ۱۴۰۵ تا پایان شهریور" : ""),
+      `قیمت پراید از گزارش‌های رسانه‌ای، برای ${yr(base)} داده نیست و ${yr(1391)} آمده است`,
+      "مسکن: بانک مرکزی و مرکز آمار، محاسبه‌ی نگارنده" + (B.sqmEst ? `. رقم ${yr(endY)} برآورد است از روند قیمت‌های آگهی‌شده در کیلید` : "")];
+    $("cmp-notes").innerHTML = notes.map((n) => `<li>${n}</li>`).join("");
   }
-  document.querySelectorAll("#cmp-base button").forEach((b) => b.addEventListener("click", () => {
-    base = +b.dataset.y;
-    document.querySelectorAll("#cmp-base button").forEach((x) => x.setAttribute("aria-pressed", x === b));
-    drawCards();
-  }));
-  $("cmp-year").addEventListener("input", drawCards);
+  $("cmp-prev").addEventListener("click", () => { if (endY > 1391) { endY--; drawCards(); } });
+  $("cmp-next").addEventListener("click", () => { if (endY < 1405) { endY++; drawCards(); } });
   drawCards();
 
   /* loop diagram */
